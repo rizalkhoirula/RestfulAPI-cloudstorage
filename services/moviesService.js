@@ -1,15 +1,15 @@
-const Film = require("../models/moviesModels");
+const movies = require("../models/moviesModels");
 const { Storage } = require("@google-cloud/storage");
 
-const storageBucket = "nama_bucket_storage"; // Ganti dengan nama bucket penyimpanan Anda di GCP
+const storageBucket = "moviesdata"; // Ganti dengan nama bucket penyimpanan Anda di GCP
 const gcStorage = new Storage({
-  keyFilename: "path/ke/kunci_akses.json", // Ganti dengan lokasi kunci akses JSON Anda
-  projectId: "id_proyek_gcp", // Ganti dengan ID proyek GCP Anda
+  keyFilename: "../credentials/service-account.json", // Ganti dengan lokasi kunci akses JSON Anda
+  projectId: "backend-microservices-392205", // Ganti dengan ID proyek GCP Anda
 });
 
-const createFilm = async (filmData) => {
+const createmovies = async (moviesData) => {
   try {
-    const { nama, deskripsi, tanggal, genre, image } = filmData;
+    const { nama, deskripsi, tanggal, genre, image } = moviesData;
 
     // Upload file gambar ke Google Cloud Storage
     const bucket = gcStorage.bucket(storageBucket);
@@ -35,8 +35,8 @@ const createFilm = async (filmData) => {
       stream.end(image.buffer);
     });
 
-    // Simpan data film ke MongoDB
-    const film = new Film({
+    // Simpan data movies ke MongoDB
+    const movies = new movies({
       nama,
       deskripsi,
       tanggal,
@@ -44,38 +44,38 @@ const createFilm = async (filmData) => {
       image: `https://storage.googleapis.com/${storageBucket}/${fileName}`,
     });
 
-    await film.save();
+    await movies.save();
 
-    return film;
+    return movies;
   } catch (error) {
     console.error("Terjadi kesalahan", error);
     throw new Error("Terjadi kesalahan");
   }
 };
 
-const getFilms = async () => {
+const getmoviess = async () => {
   try {
-    const films = await Film.find();
-    return films;
+    const moviess = await movies.find();
+    return moviess;
   } catch (error) {
     console.error("Terjadi kesalahan", error);
     throw new Error("Terjadi kesalahan");
   }
 };
 
-const getFilmById = async (filmId) => {
+const getmoviesById = async (moviesId) => {
   try {
-    const film = await Film.findById(filmId);
-    return film;
+    const movies = await movies.findById(moviesId);
+    return movies;
   } catch (error) {
     console.error("Terjadi kesalahan", error);
     throw new Error("Terjadi kesalahan");
   }
 };
 
-const updateFilm = async (filmId, filmData) => {
+const updatemovies = async (moviesId, moviesData) => {
   try {
-    const { nama, deskripsi, tanggal, genre, image } = filmData;
+    const { nama, deskripsi, tanggal, genre, image } = moviesData;
 
     // Upload file gambar ke Google Cloud Storage jika ada perubahan gambar
     let imageUrl;
@@ -106,9 +106,9 @@ const updateFilm = async (filmId, filmData) => {
       imageUrl = `https://storage.googleapis.com/${storageBucket}/${fileName}`;
     }
 
-    // Perbarui data film di MongoDB
-    const updatedFilm = await Film.findByIdAndUpdate(
-      filmId,
+    // Perbarui data movies di MongoDB
+    const updatedmovies = await movies.findByIdAndUpdate(
+      moviesId,
       {
         nama,
         deskripsi,
@@ -119,16 +119,16 @@ const updateFilm = async (filmId, filmData) => {
       { new: true }
     );
 
-    return updatedFilm;
+    return updatedmovies;
   } catch (error) {
     console.error("Terjadi kesalahan", error);
     throw new Error("Terjadi kesalahan");
   }
 };
 
-const deleteFilm = async (filmId) => {
+const deletemovies = async (moviesId) => {
   try {
-    await Film.findByIdAndDelete(filmId);
+    await movies.findByIdAndDelete(moviesId);
   } catch (error) {
     console.error("Terjadi kesalahan", error);
     throw new Error("Terjadi kesalahan");
@@ -136,9 +136,9 @@ const deleteFilm = async (filmId) => {
 };
 
 module.exports = {
-  createFilm,
-  getFilms,
-  getFilmById,
-  updateFilm,
-  deleteFilm,
+  createmovies,
+  getmovies,
+  getmoviesById,
+  updatemovies,
+  deletemovies,
 };
